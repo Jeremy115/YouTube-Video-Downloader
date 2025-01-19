@@ -1,10 +1,9 @@
 from  pytubefix import YouTube,Playlist
-import threading
 from tkinter import *
 from pytubefix.cli import on_progress
 import customtkinter
 import os
-import time
+
 
 #import env
 
@@ -45,42 +44,51 @@ def DownloadVideo(link, resolution):
             show_button_for_confirmed_download()#Shows that the video is downloaded.
              
         except Exception as e: 
-            print("Download Failed." + e)
-        
-        
-    elif resolution == '1080p': 
+            errorOccuredSimplifyException(e)
+            
+
+    elif(resolution == "Lowest Resolution"): 
+        try:
+
+            youtube_video = youtube_video.streams.get_lowest_resolution()
+            youtube_video.download(output_path=SAVE_YOUTUBE_VIDEO)
+            show_button_for_confirmed_download()#Shows that the video is downloaded.
+             
+        except Exception as e: 
+            errorOccuredSimplifyException(e)
+
+
+
+
+    """    
+    elif resolution == "1080p": 
             
         try:
 
-            youtube_video = youtube_video.streams.filter(res="1080p")
+            youtube_video = youtube_video.streams.filter(res="1080p").first()
             youtube_video.download(output_path=SAVE_YOUTUBE_VIDEO)
             print("YouTube video has been downloaded in 1080p")
 
         except Exception as e: 
-            print("Download Failed 1080p Resolution does not exists for this video.")
+            print("Download Failed: " + e)
+    elif resolution == "720p":
 
-    elif resolution == '720p':
 
-        try: 
-            youtube_video = youtube_video.streams.filter(res="720p")
-            youtube_video.download(output_path=SAVE_YOUTUBE_VIDEO)
-            print("YouTube video has been downloaded in 1080p")
-        except Exception as e: 
-            print("Download Failed Resolution does not exists or error: " + e)
+        youtube_video = youtube_video.streams.filter(res="720p").first()
+        youtube_video.download(output_path=SAVE_YOUTUBE_VIDEO)
+        print("YouTube video has been downloaded in 720p")
+    elif resolution == "480p":
 
-    elif resolution == '480p':
 
-        try: 
-            youtube_video = youtube_video.streams.filter(res="480p")
-            youtube_video.download(output_path=SAVE_YOUTUBE_VIDEO)
-            print("YouTube video has been downloaded in 1080p")
-        except Exception as e: 
-            print("Download Failed Resolution does not exists or error: " + e)
-
+        youtube_video = youtube_video.streams.filter(res="480p").first()
+        youtube_video.download(output_path=SAVE_YOUTUBE_VIDEO)
+        print("YouTube video has been downloaded in 480p")
     else: 
         print("Resolution does not exist for this video: " + link)
 
-    
+    """
+
+
 
 
 #Playlist Downloader. 
@@ -107,6 +115,7 @@ def DownloadVideoPlaylist(link, resolution):
 
 def downloadClicked(): 
 
+    hide_button_for_unconfirmed_download()
     url_label.configure(text=link_from_user.get())#gets URL
     resolution_output_label.configure(text=resolution_From_User.get())#gets resolution.
 
@@ -125,7 +134,16 @@ def downloadClicked():
     else: 
         DownloadVideo(link, resolution)
 
-  
+
+def errorOccuredSimplifyException(e):
+    error_message = f"Error: {str(e)}"
+
+    if "detected as a bot." in str(e).lower():
+        error_message = "Bot detection detected. Try again in a minute."
+            
+    show_button_for_unconfirmed_download(error_message)
+
+    
 
 
 #UI STUFF BELOW. 
@@ -178,7 +196,7 @@ text_Resolution_Box = customtkinter.CTkLabel(frame_Resolution_Box, text="Resolut
 text_Resolution_Box.grid(row=0, column=0)
 
 
-resolutionOptions = ["Highest Resolution","480p", "720p", "1080p"]
+resolutionOptions = ["Highest Resolution","Lowest Resolution"]
 
 resolution_From_User = customtkinter.CTkComboBox(frame_Resolution_Box, 
                                             values=resolutionOptions,
@@ -267,17 +285,26 @@ warningMessage.pack(padx=20)
 
 #Shows text which state that the download was confirmed. 
 ##############################################################################################
-label_show_download_confirm = customtkinter.CTkLabel(root, text="Youtube Video downloaded successfully.")
+label_show_download_confirm = customtkinter.CTkLabel(root, text="Youtube Video downloaded successfully.", fg_color="green",font=("Roboto", 24))
+label_show_download_issue = customtkinter.CTkLabel(root, text="No errors yet...", fg_color="red", font=("Roboto", 18) )
 
-
+#Download Good
 def show_button_for_confirmed_download():
-    label_show_download_confirm.pack()
+    label_show_download_confirm.pack(pady=20)
     root.after(5000, hide_button_for_confirmed_download)
    
 def hide_button_for_confirmed_download():
     label_show_download_confirm.pack_forget()
 
 
+#Issue Downloading
+def show_button_for_unconfirmed_download(error_message):
+    label_show_download_issue.configure(text=error_message)
+    label_show_download_issue.pack(pady=20)
+
+
+def hide_button_for_unconfirmed_download():
+    label_show_download_issue.pack_forget()
 
 ##############################################################################################
     
