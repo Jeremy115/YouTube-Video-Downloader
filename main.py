@@ -3,6 +3,7 @@ from tkinter import *
 from pytubefix.cli import on_progress
 import customtkinter
 import os
+import time
 
 
 #import env
@@ -35,7 +36,7 @@ def DownloadVideo(link, resolution):
     youtube_video = YouTube(link)
 
     #IDC anymore about this shit. fuck your optimization bitch
-    if resolution == "Highest Resolution":
+    if resolution == "Highest Resolution Possible":
         
         try:
 
@@ -89,28 +90,83 @@ def DownloadVideo(link, resolution):
     """
 
 
-
-
 #Playlist Downloader. 
 def DownloadVideoPlaylist(link, resolution): 
 
-    print(link)
-    print(resolution)
+    #Set Counter prior to loops
+    currentLoop = 0
 
-    i = 0
-    try:
-        pl = Playlist(link)
+    #get playlist URL prior to loops.
+    pl = Playlist(link)
+
+    #Show Progress bar.
+    show_progress_bar_on_screen()
+
+    customtkinter.CTkLabel(root, text="\n\nVideos Unable to download from playlist: \n", underline=True, font=("Roboto", 20)).pack()
+
+    #User chose high res. 
+    if(resolution == "Highest Resolution"):
+        #loop through each video in playlist and download them.  
         for playlist_url in pl.video_urls:
-            i = i + 1
-            youtube_playlist = YouTube(playlist_url)
-            playlist = youtube_playlist.streams.get_highest_resolution() #.filter(progressive=True, file_extension='mp4', res='720p').first()
-            playlist.download(output_path=SAVE_YOUTUBE_PLAYLIST + pl.title)
-            print(f'Video: {len(pl)} / ' + str(i))
-            
-        print("Youtube playlist has been downloaded")
 
-    except Exception as e:
-        print("Download Failed! \\n:" + e)
+            try:
+
+                currentLoop += 1
+
+                playlist_progress_bar.set(currentLoop / len(pl.video_urls)) 
+                root.update_idletasks()
+
+                youtube_playlist = YouTube(playlist_url)
+                video_title = youtube_playlist.title
+                playlist = youtube_playlist.streams.get_highest_resolution() 
+                playlist.download(output_path=SAVE_YOUTUBE_PLAYLIST + pl.title)
+
+
+            except Exception as e:
+                failed_video_download_in_playlist(video_title, e)
+
+
+
+    #User chose low res. 
+    elif(resolution == "Lowest Resolution Possible"):
+        #loop through each video in playlist and download them.     
+        for playlist_url in pl.video_urls:
+
+            try: 
+
+                currentLoop += 1
+                
+                playlist_progress_bar.set(currentLoop / len(pl.video_urls)) 
+                root.update_idletasks()
+                
+                youtube_playlist = YouTube(playlist_url)
+                video_title = youtube_playlist.title
+                playlist = youtube_playlist.streams.get_lowest_resolution() 
+                playlist.download(output_path=SAVE_YOUTUBE_PLAYLIST + pl.title)
+                
+
+            except Exception as e:
+                failed_video_download_in_playlist(video_title, e)
+
+    
+    hide_progress_bar_on_screen()
+    
+
+
+def failed_video_download_in_playlist(url_error, exception): 
+
+    download_failed_frame = customtkinter.CTkFrame(root, fg_color="transparent")
+    download_failed_frame.pack(padx=10)
+
+    download_failed_Label1 = customtkinter.CTkLabel(download_failed_frame, text=url_error , fg_color="red", font=("Roboto", 16))
+    download_failed_Label1.grid(row=0, column=0)
+
+    download_failed_Label2 = customtkinter.CTkLabel(download_failed_frame, text=errorOccuredInPLaylistDownload(exception), font=("Roboto", 16))
+    download_failed_Label2.grid(row=0, column=1)
+
+    root.update_idletasks()
+
+
 
 
 def downloadClicked(): 
@@ -135,6 +191,15 @@ def downloadClicked():
         DownloadVideo(link, resolution)
 
 
+def errorOccuredInPLaylistDownload(e):
+    error_message = f" - Error: {str(e)}"
+
+    if"detected as a bot." in str(e).lower():
+        error_message = " - Bot detection."
+
+    return error_message + "\n"
+
+
 def errorOccuredSimplifyException(e):
     error_message = f"Error: {str(e)}"
 
@@ -144,13 +209,6 @@ def errorOccuredSimplifyException(e):
     show_button_for_unconfirmed_download(error_message)
 
     
-
-
-#UI STUFF BELOW. 
-
-
-
-
 
 #URL Text box
 #########################################################################################
@@ -196,7 +254,7 @@ text_Resolution_Box = customtkinter.CTkLabel(frame_Resolution_Box, text="Resolut
 text_Resolution_Box.grid(row=0, column=0)
 
 
-resolutionOptions = ["Highest Resolution","Lowest Resolution"]
+resolutionOptions = ["Highest Resolution Possible","Lowest Resolution Possible"]
 
 resolution_From_User = customtkinter.CTkComboBox(frame_Resolution_Box, 
                                             values=resolutionOptions,
@@ -260,11 +318,10 @@ clear_button.grid(row=0, column=1, padx=20)
 
 
 
-
-warningMessage = customtkinter.CTkLabel(root, text="WARNING: If you download a playlist. It will take the highest possible resolution for" 
-                                        + " each video.\n\nThe downloader is not stuck but give it time to download if "
-                                        + "nothing happens after you click.\n\n\n\nYour download can be found at your Desktop/YouTubeDownloads"
-                                        + "\nIt will create two folders once you download a video or playlist upon your first download."
+warningMessage = customtkinter.CTkLabel(root, text="\n\n\n\nNOTE: By default your download can be found at: ~/Desktop/YouTubeDownloads"
+                                        + "\n\nUpon your first attempt to download a video or playlist, it will create a folder for each."
+                                        + "\n\nSingle Video Downloads - ~/Desktop/YouTubeDownloads/YouTubeVideos"
+                                        + "\n\nPlaylist Downloads - ~/Desktop/YouTubeDownloads/YoutubePlaylist"
                                         
                                          , font=("Roboto", 18),
                                            fg_color="transparent" )
@@ -274,21 +331,17 @@ warningMessage.pack(padx=20)
 
 
 
-
-
-#Downloading in progress text.  
-############################################################################################
-#puts a placeholder on screen invisible till clicked. 
- 
-
-
-
 #Shows text which state that the download was confirmed. 
 ##############################################################################################
 label_show_download_confirm = customtkinter.CTkLabel(root, text="Youtube Video downloaded successfully.", fg_color="green",font=("Roboto", 24))
 label_show_download_issue = customtkinter.CTkLabel(root, text="No errors yet...", fg_color="red", font=("Roboto", 18) )
+playlist_progress_bar = customtkinter.CTkProgressBar(root, orientation="horizontal", width=300, height=30, mode="determinate")
+playlist_progress_bar.pack_forget()
+playlist_progress_bar.set(0)
 
-#Download Good
+
+
+#Download Good:
 def show_button_for_confirmed_download():
     label_show_download_confirm.pack(pady=20)
     root.after(5000, hide_button_for_confirmed_download)
@@ -297,17 +350,35 @@ def hide_button_for_confirmed_download():
     label_show_download_confirm.pack_forget()
 
 
-#Issue Downloading
+
+#Issues Downloading:
 def show_button_for_unconfirmed_download(error_message):
     label_show_download_issue.configure(text=error_message)
     label_show_download_issue.pack(pady=20)
 
-
 def hide_button_for_unconfirmed_download():
     label_show_download_issue.pack_forget()
 
-##############################################################################################
+
+
+#show progress bar and hide after:
+def show_progress_bar_on_screen(): 
+    playlist_progress_bar.set(0)
+    playlist_progress_bar.pack(pady=20)
+    root.update_idletasks()
     
+
+def hide_progress_bar_on_screen():
+    root.after(2000)
+    playlist_progress_bar.pack_forget()
+    root.update_idletasks()
+
+
+
+##############################################################################################
+
+
+
 
 #Main Loop. 
 root.mainloop()
