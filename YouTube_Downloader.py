@@ -1,3 +1,4 @@
+from typing import Tuple
 from  pytubefix import YouTube,Playlist
 from tkinter import *
 from pytubefix.cli import on_progress
@@ -5,6 +6,7 @@ import customtkinter
 import os
 import sys
 import shutil
+import sys
 
 
 #GUI init   
@@ -56,8 +58,11 @@ SAVE_YOUTUBE_PLAYLIST = os.path.join(os.path.expanduser("~"), "Desktop\YouTubeDo
 #Video Downloader. 
 def DownloadVideo(link, resolution):
 
-
-    youtube_video = YouTube(link)
+    #check if po token is needed. 
+    if po_button_checkbox.get() == "on":
+        youtube_video = YouTube(link, use_po_token=True, po_token_verifier=po_token_verifier)
+    else: 
+        youtube_video = YouTube(link)
 
     #Get video for highest Resolution.
     if resolution == "Highest Resolution Possible":
@@ -70,7 +75,6 @@ def DownloadVideo(link, resolution):
             show_button_for_confirmed_download()#Shows that the video is downloaded.
              
         except Exception as e: 
-            print("\nException Here: " + str(e))
             errorOccuredSimplifyException(e)
             
 
@@ -87,8 +91,9 @@ def DownloadVideo(link, resolution):
 #Playlist Downloader. 
 def DownloadVideoPlaylist(link, resolution): 
 
-    #Set Counter prior to loops
+    #Set Counter and once flag: 
     currentLoop = 0
+    flagErrorOnce = True
 
     #get playlist URL prior to loops.
     pl = Playlist(link)
@@ -96,8 +101,8 @@ def DownloadVideoPlaylist(link, resolution):
     #Show Progress bar.
     show_progress_bar_on_screen()
 
-    customtkinter.CTkLabel(root, text="\n\nVideos Unable to download from playlist: \n", underline=True, font=("Roboto", 20)).pack()
 
+    
     #User chose high res. 
     if(resolution == "Highest Resolution Possible"):
         #loop through each video in playlist and download them.  
@@ -110,13 +115,21 @@ def DownloadVideoPlaylist(link, resolution):
                 playlist_progress_bar.set(currentLoop / len(pl.video_urls)) 
                 root.update_idletasks()
 
-                youtube_playlist = YouTube(playlist_url)
+                #check if PoToken is needed. 
+                if po_button_checkbox.get() == "on":
+                    youtube_playlist = YouTube(playlist_url, use_po_token=True, po_token_verifier=po_token_verifier)
+                else:
+                    youtube_playlist = YouTube(playlist_url)
+
                 video_title = youtube_playlist.title
                 playlist = youtube_playlist.streams.get_highest_resolution() 
                 playlist.download(output_path=SAVE_YOUTUBE_PLAYLIST + pl.title)
 
 
             except Exception as e:
+                if(flagErrorOnce == True):
+                    customtkinter.CTkLabel(root, text="\n\nVideos Unable to download from playlist: \n", underline=True, font=("Roboto", 20)).pack()
+                    flagErrorOnce == False
                 failed_video_download_in_playlist(video_title, e)
 
 
@@ -132,18 +145,29 @@ def DownloadVideoPlaylist(link, resolution):
                 
                 playlist_progress_bar.set(currentLoop / len(pl.video_urls)) 
                 root.update_idletasks()
-                
-                youtube_playlist = YouTube(playlist_url)
+
+                #check POtoken is to be used. 
+                if po_button_checkbox.get() == "on":
+                    youtube_playlist = YouTube(playlist_url, use_po_token=True, po_token_verifier=po_token_verifier)
+                else:
+                    youtube_playlist = YouTube(playlist_url)
+
                 video_title = youtube_playlist.title
                 playlist = youtube_playlist.streams.get_lowest_resolution() 
                 playlist.download(output_path=SAVE_YOUTUBE_PLAYLIST + pl.title)
                 
 
             except Exception as e:
+                if(flagErrorOnce == True):
+                    customtkinter.CTkLabel(root, text="\n\nVideos Unable to download from playlist: \n", underline=True, font=("Roboto", 20)).pack()
+                    flagErrorOnce == False
                 failed_video_download_in_playlist(video_title, e)
 
     
     hide_progress_bar_on_screen()
+
+    if(flagErrorOnce == True):
+        show_button_for_confirmed_download_playlist_no_errors()
     
 
 
@@ -200,6 +224,13 @@ def errorOccuredSimplifyException(e):
         error_message = "Bot detection detected. Try again in a minute."
             
     show_button_for_unconfirmed_download(error_message)
+
+def po_token_verifier() -> Tuple[str, str]:
+
+    token = "MnRxh5aCq8sMYnG_GUJ0rBoldr0Qiyyls5SYew-Gk-t4uaFfTQ6yXdPCY8qZFDEwQLYpxyqrSDZbVNUfTbQOHDGd2ZxNA_wASZuFFUm0TEGTKtEItUEM78-GfGpcwXSpxztcWyiJXqRvmRb2FFuC1diYqZl4uw=="
+    visitorData = "CgtJcEJvZmJ6bjg4cyipxcW8BjIKCgJVUxIEGgAgXg%3D%3D"
+
+    return visitorData, token
 
 
 
@@ -285,7 +316,7 @@ download_button = customtkinter.CTkButton(frame,
                         border_width=1
                         )
 #download_button.pack(pady=90)
-download_button.grid(row=0, column=0)
+download_button.grid(row=0, column=0, padx=20)
 ############################################################################################
 
 #Clear button. 
@@ -309,7 +340,19 @@ clear_button = customtkinter.CTkButton(frame,
 clear_button.grid(row=0, column=1, padx=20)
 ############################################################################################
 
+#CheckBox for use po_token
+############################################################################################
+usePO_button = customtkinter.StringVar(value="on")
+po_button_checkbox = customtkinter.CTkCheckBox(frame, text="Use PO Token", 
+                                               variable=usePO_button, 
+                                               onvalue="on", 
+                                               offvalue="off", 
+                                               font=("Roboto", 24))
+po_button_checkbox.grid(row=0, column=2, padx=20)
 
+
+
+############################################################################################
 
 warningMessage = customtkinter.CTkLabel(root, text="\n\n\n\nNOTE: By default your download can be found at: ~/Desktop/YouTubeDownloads"
                                         + "\n\nUpon your first attempt to download a video or playlist, it will create a folder for each."
@@ -328,6 +371,7 @@ warningMessage.pack(padx=20)
 ##############################################################################################
 label_show_download_confirm = customtkinter.CTkLabel(root, text="Youtube Video downloaded successfully.", fg_color="green",font=("Roboto", 24))
 label_show_download_issue = customtkinter.CTkLabel(root, text="No errors yet...", fg_color="red", font=("Roboto", 18) )
+label_show_download_confirm_no_erros_from_playlist = customtkinter.CTkLabel(root, text="Youtube PlayList downloaded successfully.", fg_color="green",font=("Roboto", 24))
 playlist_progress_bar = customtkinter.CTkProgressBar(root, orientation="horizontal", width=300, height=30, mode="determinate")
 playlist_progress_bar.pack_forget()
 playlist_progress_bar.set(0)
@@ -336,13 +380,18 @@ playlist_progress_bar.set(0)
 
 #Download Good:
 def show_button_for_confirmed_download():
-    label_show_download_issue.pack_forget()
     label_show_download_confirm.pack(pady=20)
     root.after(5000, hide_button_for_confirmed_download)
    
 def hide_button_for_confirmed_download():
     label_show_download_confirm.pack_forget()
 
+def show_button_for_confirmed_download_playlist_no_errors():
+    label_show_download_confirm_no_erros_from_playlist.pack(pady=20)
+    root.after(5000, hide_button_for_confirmed_download_playlist_no_errors)
+
+def hide_button_for_confirmed_download_playlist_no_errors(): 
+    label_show_download_confirm_no_erros_from_playlist.pack_forget()
 
 
 #Issues Downloading:
