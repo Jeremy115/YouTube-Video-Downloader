@@ -9,14 +9,19 @@ I recommend downloading and not attempting to redownload the video as multple ti
 
 
 
+Keep in mind that windows will see this as a virus since its not signed by windows when downloading one of the .rar or .zip folders.
+
+In order to compile everything for non-power users, that is the solution since they wont have the dependencies installed. 
 
 
+IF YOU WANT TO ALLOW WINDOWS TO INSTALL THE .rar OR .zip AND NOT FLAG IT HERE ARE THE INSTRUCTIONS: 
+
+DO THIS AT YOUR OWN RISK.
+ANYTIME YOU INSTALL SOMETHING ON THE ENTERENET IT IS A RISK!
 
 
-
-
-
-
+Settings> Update and Security> Windows Security> Virus & threat protection
+> under Virus and threat protection settings -> Manage settings  -> under exclusions(scroll down) -> ADD OR REMOVE EXCLUSIONs
 
 
 
@@ -24,7 +29,7 @@ I recommend downloading and not attempting to redownload the video as multple ti
 If you are wanting to create your own exe with modifications:  
 
 Activate environment. 
-#WINDOWS ONLY
+WINDOWS ONLY
 source env\Scripts\activate
 -Here you can add your own packages into the virtual environment. 
 
