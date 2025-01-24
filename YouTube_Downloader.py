@@ -352,14 +352,19 @@ po_button_checkbox.grid(row=0, column=2, padx=20)
 
 
 ############################################################################################
+warningMessageText = customtkinter.CTkLabel(root, text=
+                                            "\n\nTurning off Po Token will be faster but unreliable at times."
+                                            + "\n\nIf the program freezes with the PO token on, it's still downloading — just give it time."
+                                            ,font=("Roboto", 18)
+                                            ,fg_color="transparent"
+                                            )
+warningMessageText.pack(padx=20)
+
 
 warningMessage = customtkinter.CTkLabel(root, text=
-                                        "\n\nTurning off Po Token will be faster but unreliable at times."
-                                        + "\n\nIf the program freezes with the PO token on, it's still downloading — just give it time."
-                                        + "\n\nSingle Video Downloads - " + str(loadCustomVideoPath()["video_Path"])
+                                         "\n\nSingle Video Downloads - " + str(loadCustomVideoPath()["video_Path"])
                                         + "\n\nPlaylist Downloads - " + str(loadCustomVideoPath()["playlist_Path"])
-                                        
-                                        , font=("Roboto", 18),
+                                        , font=("Roboto", 22),
                                         fg_color="transparent" )
 warningMessage.pack(padx=20)
 
@@ -560,9 +565,10 @@ change_default_dir.pack(padx=20, pady=60)
 #used in input_Custom_File_locations to show file locations have been updated. 
 def update_video_download_Location():
     warningMessage.configure(
-        text="\n\nSingle Video Downloads - " + str(loadCustomVideoPath()["video_Path"]) +
-             "\n\nPlaylist Downloads - " + str(loadCustomVideoPath()["playlist_Path"]),
-        font=("Roboto", 18),
+        text=
+        "\n\nSingle Video Downloads - " + str(loadCustomVideoPath()["video_Path"]) 
+        + "\n\nPlaylist Downloads - " + str(loadCustomVideoPath()["playlist_Path"]),
+        font=("Roboto", 24),
         fg_color="transparent"
     )
 
