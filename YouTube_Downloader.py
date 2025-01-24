@@ -198,7 +198,7 @@ def downloadClicked():
     
     if "&list=" in link or "?list=" in link: 
         DownloadVideoPlaylist(link, resolution)
-    elif "?v=" in link: 
+    elif "?v=" in link or "/shorts/" in link: 
         DownloadVideo(link, resolution)
     elif link == "": 
         quit
@@ -579,7 +579,7 @@ def update_video_download_Location():
 label_show_download_confirm = customtkinter.CTkLabel(root, text="Youtube Video downloaded successfully.", fg_color="green",font=("Roboto", 24))
 label_show_download_issue = customtkinter.CTkLabel(root, text="No errors yet...", fg_color="red", font=("Roboto", 18) )
 label_show_download_confirm_no_erros_from_playlist = customtkinter.CTkLabel(root, text="Youtube PlayList downloaded successfully.", fg_color="green",font=("Roboto", 24))
-no_Video_Found_Message = customtkinter.CTkLabel(root, text="This video does not exists. Program looks for &list=(Playlist) or ?v=(Video) in URL."
+no_Video_Found_Message = customtkinter.CTkLabel(root, text="This video does not exists.\nProgram looks for &list=(Playlist) and either ?v= or /shorts/ to identify individual videos."
                                                 + "\nIf you are trying to copy and paste from the share button on the playlist. IT WILL FAIL to find the playlist."
                                                 + "\n\nIMPORTANT: You CAN use a URL from a video in the playlist if you want to the get the playlist.", fg_color="red", font=("Roboto", 18) )
 playlist_progress_bar = customtkinter.CTkProgressBar(root, orientation="horizontal", width=300, height=30, mode="determinate")
@@ -615,7 +615,7 @@ def hide_button_for_unconfirmed_download():
 def video_or_playlist_not_found(): 
     
     no_Video_Found_Message.pack(pady=20)
-    root.after(8000, no_Video_Found_Message.pack_forget)
+    root.after(14000, no_Video_Found_Message.pack_forget)
 
 
 #show progress bar and hide after:
