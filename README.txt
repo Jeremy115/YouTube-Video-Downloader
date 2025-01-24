@@ -20,8 +20,13 @@ DO THIS AT YOUR OWN RISK.
 ANYTIME YOU INSTALL SOMETHING ON THE ENTERENET IT IS A RISK!
 
 
-Settings> Update and Security> Windows Security> Virus & threat protection
-> under Virus and threat protection settings -> Manage settings  -> under exclusions(scroll down) -> ADD OR REMOVE EXCLUSIONs
+  1. Remove any .rar or .zip downloads in the downloads folder. 
+
+  2. KEEP IN MIND TO TURN THIS BUTTON BACK ON SO DO NOT CLOSE THE WINDOW WHEN YOU GET HERE:
+      Settings> Update and Security> Windows Security> Open Windows Security > 
+      > Virus & threat protection > Virus & threat protection settings > TURN OFF REAL-TIME Protection. 
+
+
 
 
 
