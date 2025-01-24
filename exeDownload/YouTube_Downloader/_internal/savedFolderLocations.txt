@@ -1,0 +1,1 @@
+{"video_Path": "C:\\Users\\Jeremy Wilson\\Desktop\\Spicy\\Videos", "playlist_Path": "C:\\Users\\Jeremy Wilson\\Desktop\\Spicy\\playlist\\"}
